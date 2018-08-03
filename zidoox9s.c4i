@@ -195,36 +195,7 @@ DEFAULT_PROXY_BINDINGID = 5001
 		calling the UpdateProperty command, only when the Property is changed by the user from
 		the Properties Page. This function is called by Director when a property changes value.
 --]]
-function OnPropertyChanged(sProperty)
-	Dbg:Trace("OnPropertyChanged(" .. sProperty .. ") changed to: " .. Properties[sProperty])
 
-	local propertyValue = Properties[sProperty]
-	
-	-- Remove any spaces (trim the property)
-	local trimmedProperty = string.gsub(sProperty, " ", "")
-
-	-- if function exists then execute (non-stripped)
-	if (ON_PROPERTY_CHANGED[sProperty] ~= nil and type(ON_PROPERTY_CHANGED[sProperty]) == "function") then
-		ON_PROPERTY_CHANGED[sProperty](propertyValue)
-		return
-	-- elseif trimmed function exists then execute
-	elseif (ON_PROPERTY_CHANGED[trimmedProperty] ~= nil and type(ON_PROPERTY_CHANGED[trimmedProperty]) == "function") then
-		ON_PROPERTY_CHANGED[trimmedProperty](propertyValue)
-		return
-	end
-end
-
-function ON_PROPERTY_CHANGED.DebugMode(propertyValue)
-	gDebugTimer:KillTimer()
-	Dbg:OutputPrint(propertyValue:find("Print") ~= nil)
-	Dbg:OutputC4Log(propertyValue:find("Log") ~= nil)
-	if (propertyValue == "Off") then return end
-	gDebugTimer:StartTimer()
-end
-
-function ON_PROPERTY_CHANGED.DebugLevel(propertyValue)
-	Dbg:SetLogLevel(tonumber(string.sub(propertyValue, 1, 1)))
-end
 
 ---------------------------------------------------------------------
 -- ExecuteCommand Code
@@ -830,6 +801,42 @@ function OnTimerExpired(timerID)
 			table.remove(sendKeyTable, 1)
 		end
 	end
+end
+
+function OnPropertyChanged(sProperty)
+	Dbg:Trace("OnPropertyChanged(" .. sProperty .. ") changed to: " .. Properties[sProperty])
+
+	local propertyValue = Properties[sProperty]
+	ZIDOO_IP = Properties['DEVICE_IP']
+	SKIP_FWD_TIME = tonumber(Properties['SKIP_FWD_TIME'])
+	SKIP_REV_TIME = tonumber(Properties['SKIP_REV_TIME'])
+
+	Dbg:Info("Changed DEVICE_IP: " .. ZIDOO_IP)
+	
+	-- Remove any spaces (trim the property)
+	local trimmedProperty = string.gsub(sProperty, " ", "")
+
+	-- if function exists then execute (non-stripped)
+	if (ON_PROPERTY_CHANGED[sProperty] ~= nil and type(ON_PROPERTY_CHANGED[sProperty]) == "function") then
+		ON_PROPERTY_CHANGED[sProperty](propertyValue)
+		return
+	-- elseif trimmed function exists then execute
+	elseif (ON_PROPERTY_CHANGED[trimmedProperty] ~= nil and type(ON_PROPERTY_CHANGED[trimmedProperty]) == "function") then
+		ON_PROPERTY_CHANGED[trimmedProperty](propertyValue)
+		return
+	end
+end
+
+function ON_PROPERTY_CHANGED.DebugMode(propertyValue)
+	gDebugTimer:KillTimer()
+	Dbg:OutputPrint(propertyValue:find("Print") ~= nil)
+	Dbg:OutputC4Log(propertyValue:find("Log") ~= nil)
+	if (propertyValue == "Off") then return end
+	gDebugTimer:StartTimer()
+end
+
+function ON_PROPERTY_CHANGED.DebugLevel(propertyValue)
+	Dbg:SetLogLevel(tonumber(string.sub(propertyValue, 1, 1)))
 end
 
 
